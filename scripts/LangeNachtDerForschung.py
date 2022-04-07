@@ -2,41 +2,74 @@
 
 import numpy as np
 from pycrazyswarm import *
+import uav_trajectory
 
-RefHeight = 0.75
-swarm = Crazyswarm()
-timeHelper = swarm.timeHelper
-cf = swarm.allcfs.crazyflies[0]
-wand = swarm.allcfs.crazyflies[1]
 
-def landInOrigin():
-    # function that makes the cf fly back to (0,0,RefHeigth+0.5) and land there
+def landInOrigin(cf, RefHeight, timeHelper):
+    #
+    # function that makes the cf fly back to the origin (0,0,RefHeigth+0.5) and land there
+    #
+
     cf.goTo([0, 0, RefHeight+0.5], yaw=0, duration=5)   
     timeHelper.sleep(5)
     cf.land(targetHeight=RefHeight+0.02, duration=2)
     timeHelper.sleep(2)
 
 
-def followTheWand():
+def figure8(cf, RefHeight, timeHelper):
+    #
+    # fly a 8 figure forwards and backwards
+    #
+
+    traj1 = uav_trajectory.Trajectory()
+    traj1.loadcsv("figure8.csv")
+
+    TRIALS = 1
+    TIMESCALE = 2.0
+    for i in range(TRIALS):
+        cf.uploadTrajectory(0, 0, traj1)
+
+        cf.takeoff(targetHeight=Z, duration=2.0)
+        timeHelper.sleep(2.5)
+        
+
+        cf.startTrajectory(0, timescale=TIMESCALE)
+        timeHelper.sleep(traj1.duration * TIMESCALE + 2.0)
+        cf.startTrajectory(0, timescale=TIMESCALE, reverse=True)
+        timeHelper.sleep(traj1.duration * TIMESCALE + 2.0)
+
+        cf.land(targetHeight=RefHeight+0.02, duration=2.0)
+        timeHelper.sleep(3.0)
+
+
+def followTheWand(cf, wand, sampleAmount, RefHeight, swarm, timeHelper):
+    #
+    # Follow the wand with a given distance
+    #
+
     offset = np.array([1.0, 0.0, 0.0])  # offset in which the drone should follow the wand
     cf.takeoff(targetHeight=RefHeight+0.5, duration=2)
     timeHelper.sleep(2)
 
     # Wait until key is pressed before following the wand
-    print("press button to continue\n\n\n")
+    print("press button to start following the wand\n\n\n")
     swarm.input.waitUntilButtonPressed()
 
     i = 0
-    while i <= 100:
+    while i <= sampleAmount:
         cf.cmdPosition(wand.position() + offset, yaw=0.0)
         timeHelper.sleep(0.1)
         i = i+1
 
     cf.notifySetpointsStop(remainValidMillisecs=100)    # Needed for change of low-lvl commander to high-lvl commander (cmdPosition -> goTo)
-    landInOrigin()
+    landInOrigin(cf, RefHeight, timeHelper)
 
 
-def followTheWaypoints():
+def followTheWaypoints(cf, wand, RefHeight, swarm, timeHelper):
+    #
+    # Set 4 waypoints and fly straight lines between those points
+    #
+
     waypoints = np.array([
         (0.0, 0.0, 0.0),
         (0.0, 0.0, 0.0),
@@ -70,24 +103,25 @@ def followTheWaypoints():
     timeHelper.sleep(3)
 
     for p in waypoints:
-        cf.goTo(p, yaw=0.0, duration=3)
+        cf.goTo(p, yaw=0.0, duration=4)
         timeHelper.sleep(4)
 
-    landInOrigin()
+    landInOrigin(cf, RefHeight, timeHelper)
 
 
-def followThePath():
-    n = 100     # amount of samples
+def followThePath(cf, wand, sampleAmount, RefHeight, swarm, timeHelper):
+    #
+    # Draw a path in the capture volume and fly through this path afterwards
+    #
 
     # Sample wand path    
     print("\n\n\n\n------------------------------ Wand Sampling ------------------------------\n\n\n")
-    n = 10 * input('Enter the amount of time for sampling the path [sec]:\n\n\n') # make ~10 samples / second
     print("Press a button to start the trajectory sampling process!\n\n\n\n")
     
-    samples = np.zeros((n, 3))
+    samples = np.zeros((sampleAmount, 3))
     swarm.input.waitUntilButtonPressed()
     
-    for i in range(0,n):
+    for i in range(0,sampleAmount):
         samples[i,:] = wand.position()
         timeHelper.sleep(0.1)
 
@@ -102,23 +136,39 @@ def followThePath():
     cf.goTo(samples[0,:], yaw=0.0, duration=2)  # fly to first sample point (in high-lvl commander)
     timeHelper.sleep(3)
 
-    for p in samples:
-        cf.cmdPosition(p, yaw=0.0)
+    for n in samples:
+        cf.cmdPosition(n, yaw=0.0)
         timeHelper.sleep(0.1)
 
     cf.notifySetpointsStop(remainValidMillisecs=100)    # Needed for change of low-lvl commander to high-lvl commander (cmdPosition -> goTo)
 
-    landInOrigin()
+    landInOrigin(cf, RefHeight, timeHelper)
 
 
 def main():
-    progCode = input('Enter programcode to execute:\nFollow the wand --> 0\nFollow the Waypoints --> 1\nFollow the path --> 2\n\n\n')
+    RefHeight = 0.75
+    swarm = Crazyswarm()
+    timeHelper = swarm.timeHelper
+    cf = swarm.allcfs.crazyflies[0]
+    wand = swarm.allcfs.crazyflies[1]
+    sampleAmount = 0
+
+    progCode = int(input('Enter programcode to execute:\n\nFly a 8 figure: --> 0\n\nFollow the wand --> 1\n\nFollow the Waypoints --> 2\n\nFollow the path --> 3\n\n\n'))
+
     if progCode == 0:
-        followTheWand()
+        figure8(cf, RefHeight, timeHelper)
+
     elif progCode == 1:
-        followTheWaypoints()
+        sampleAmount = int(input('Enter amount of samples taken of the wand: '))
+        followTheWand(cf, wand, sampleAmount, RefHeight, swarm, timeHelper)
+
     elif progCode == 2:
-        followThePathl()
+        followTheWaypoints(cf, wand, RefHeight, swarm, timeHelper)
+
+    elif progCode == 3:
+        sampleAmount = int(input('Enter amount of samples taken of the wand: '))
+        followThePath(cf, wand, sampleAmount, RefHeight, swarm, timeHelper)
+        
     else:
         print("Programcode invalid!")
 
