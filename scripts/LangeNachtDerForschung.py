@@ -153,20 +153,20 @@ def main():
     wand = swarm.allcfs.crazyflies[1]
     sampleAmount = 0
 
-    progCode = int(input('Enter programcode to execute:\n\nFly a 8 figure: --> 0\n\nFollow the wand --> 1\n\nFollow the Waypoints --> 2\n\nFollow the path --> 3\n\n\n'))
+    progCode = int(input('Enter programcode to execute:\n\nFly a 8: --> 1\n\nFollow the wand --> 2\n\nFollow the Waypoints --> 3\n\nFollow the path --> 4\n\n\n'))
 
-    if progCode == 0:
+    if progCode == 1:
         figure8(cf, RefHeight, timeHelper)
 
-    elif progCode == 1:
-        sampleAmount = int(input('Enter amount of samples taken of the wand: '))
+    elif progCode == 2:
+        sampleAmount = (10*int(input('Enter time the cf should follow the wand[s]: ')))     # ~10 samples per second are taken
         followTheWand(cf, wand, sampleAmount, RefHeight, swarm, timeHelper)
 
-    elif progCode == 2:
+    elif progCode == 3:
         followTheWaypoints(cf, wand, RefHeight, swarm, timeHelper)
 
-    elif progCode == 3:
-        sampleAmount = int(input('Enter amount of samples taken of the wand: '))
+    elif progCode == 4:
+        sampleAmount = (10*int(input('Enter time the path should be stored[s]: ')))     # ~10 samples per second are taken
         followThePath(cf, wand, sampleAmount, RefHeight, swarm, timeHelper)
         
     else:
