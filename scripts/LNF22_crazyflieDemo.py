@@ -16,6 +16,16 @@ def landInOrigin(cf, RefHeight, timeHelper):
     timeHelper.sleep(2)
 
 
+def hoverTest(cf, RefHeight, timeHelper):
+    #
+    # takeoff, hover for 5 seconds than land 
+    #
+    cf.takeoff(targetHeight=1.5, duration=2)
+    timeHelper.sleep(2 + 5)
+    cf.land(targetHeight=0.04, duration=2)
+    timeHelper.sleep(2)
+
+
 def figure8(cf, RefHeight, timeHelper):
     #
     # fly a 8 figure forwards and backwards
@@ -47,7 +57,7 @@ def followTheWand(cf, wand, sampleAmount, RefHeight, swarm, timeHelper):
     # Follow the wand with a given distance
     #
 
-    offset = np.array([1.0, 0.0, 0.0])  # offset in which the drone should follow the wand
+    offset = np.array([0.4, 0.0, 0.0])  # offset in which the drone should follow the wand
     cf.takeoff(targetHeight=RefHeight+1.5, duration=2)
     timeHelper.sleep(2)
 
@@ -152,9 +162,12 @@ def main():
     wand = swarm.allcfs.crazyflies[1]
     sampleAmount = 0
 
-    progCode = int(input('Enter programcode to execute:\n\nFly a 8: --> 1\n\nFollow the wand --> 2\n\nFollow the Waypoints --> 3\n\nFollow the path --> 4\n\n\n'))
+    progCode = int(input('Enter programcode to execute:\n\nHover test: --> 0\n\nFly a 8: --> 1\n\nFollow the wand --> 2\n\nFollow the Waypoints --> 3\n\nFollow the path --> 4\n\n\n'))
 
-    if progCode == 1:
+    if progCode == 0:
+        hoverTest(cf, RefHeight, timeHelper)
+
+    elif progCode == 1:
         figure8(cf, RefHeight, timeHelper)
 
     elif progCode == 2:
