@@ -1,0 +1,31 @@
+
+Terminal 1
+
+
+source /opt/ros/noetic/setup.bash
+source crazyswarm/ros_ws/devel/setup.bash
+cd crazyswarm/ros_ws/src/crazyswarm/scripts
+python3 chooser.py
+
+
+
+cd
+source crazyswarm/ros_ws/devel/setup.bash
+roslaunch crazyswarm hover_swarm.launch
+
+
+
+Terminal 2
+
+
+source crazyswarm/ros_ws/devel/setup.bash
+cd crazyswarm/ros_ws/src/crazyswarm/scripts
+python3 hello_world.py
+
+
+
+
+// client
+
+cd crazyflie-clients-python
+python3 -m cfclient.gui

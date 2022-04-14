@@ -1,0 +1,12 @@
+Motive: Start streaming a Rigid Body
+
+roslaunch vrpn_client_ros sample.launch server:=143.205.143.247
+IP of PC Computer
+
+
+To see position of markers:
+rostopic echo /vrpn_client_node/Wand/pose
+
+
+
+https://answers.ros.org/question/285887/ros_vrpn_client-installation-help/
