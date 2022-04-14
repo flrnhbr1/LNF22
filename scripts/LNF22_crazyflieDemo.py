@@ -20,6 +20,7 @@ def hoverTest(cf, RefHeight, timeHelper):
     #
     # takeoff, hover for 5 seconds than land 
     #
+    
     cf.takeoff(targetHeight=1.5, duration=2)
     timeHelper.sleep(2 + 5)
     cf.land(targetHeight=0.04, duration=2)
