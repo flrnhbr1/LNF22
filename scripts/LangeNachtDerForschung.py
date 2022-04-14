@@ -25,11 +25,11 @@ def figure8(cf, RefHeight, timeHelper):
     traj1.loadcsv("figure8.csv")
 
     TRIALS = 1
-    TIMESCALE = 2.0
+    TIMESCALE = 1.0
     for i in range(TRIALS):
         cf.uploadTrajectory(0, 0, traj1)
 
-        cf.takeoff(targetHeight=Z, duration=2.0)
+        cf.takeoff(targetHeight=RefHeight+0.5, duration=2.0)
         timeHelper.sleep(2.5)
         
 
