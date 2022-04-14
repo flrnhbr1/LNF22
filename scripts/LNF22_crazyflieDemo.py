@@ -12,7 +12,7 @@ def landInOrigin(cf, RefHeight, timeHelper):
 
     cf.goTo([0, 0, RefHeight+0.5], yaw=0, duration=5)   
     timeHelper.sleep(5)
-    cf.land(targetHeight=RefHeight+0.02, duration=2)
+    cf.land(targetHeight=RefHeight+0.05, duration=2)
     timeHelper.sleep(2)
 
 
@@ -29,7 +29,7 @@ def figure8(cf, RefHeight, timeHelper):
     for i in range(TRIALS):
         cf.uploadTrajectory(0, 0, traj1)
 
-        cf.takeoff(targetHeight=RefHeight+0.5, duration=2.0)
+        cf.takeoff(targetHeight=RefHeight+1.5, duration=2.0)
         timeHelper.sleep(2.5)
         
 
@@ -38,8 +38,8 @@ def figure8(cf, RefHeight, timeHelper):
         cf.startTrajectory(0, timescale=TIMESCALE, reverse=True)
         timeHelper.sleep(traj1.duration * TIMESCALE + 2.0)
 
-        cf.land(targetHeight=RefHeight+0.02, duration=2.0)
-        timeHelper.sleep(3.0)
+        cf.land(targetHeight=RefHeight+0.05, duration=3)
+        timeHelper.sleep(3)
 
 
 def followTheWand(cf, wand, sampleAmount, RefHeight, swarm, timeHelper):
@@ -48,7 +48,7 @@ def followTheWand(cf, wand, sampleAmount, RefHeight, swarm, timeHelper):
     #
 
     offset = np.array([1.0, 0.0, 0.0])  # offset in which the drone should follow the wand
-    cf.takeoff(targetHeight=RefHeight+0.5, duration=2)
+    cf.takeoff(targetHeight=RefHeight+1.5, duration=2)
     timeHelper.sleep(2)
 
     # Wait until key is pressed before following the wand
@@ -99,7 +99,7 @@ def followTheWaypoints(cf, wand, RefHeight, swarm, timeHelper):
 
     print(waypoints)  
 
-    cf.takeoff(targetHeight=1, duration=2)
+    cf.takeoff(targetHeight=RefHeight+1.5, duration=2)
     timeHelper.sleep(3)
 
     for p in waypoints:
@@ -115,8 +115,7 @@ def followThePath(cf, wand, sampleAmount, RefHeight, swarm, timeHelper):
     #
 
     # Sample wand path    
-    print("\n\n\n\n------------------------------ Wand Sampling ------------------------------\n\n\n")
-    print("Press a button to start the trajectory sampling process!\n\n\n\n")
+    print("\n\n\n\n----------------------- Press a button to start the trajectory sampling process! -----------------------\n\n\n")
     
     samples = np.zeros((sampleAmount, 3))
     swarm.input.waitUntilButtonPressed()
@@ -130,7 +129,7 @@ def followThePath(cf, wand, sampleAmount, RefHeight, swarm, timeHelper):
     print("\n\n--------------------Press a button to fly the path!--------------------")
     swarm.input.waitUntilButtonPressed()
 
-    cf.takeoff(targetHeight=1.0, duration=2.0)
+    cf.takeoff(targetHeight=RefHeight+1.5, duration=2.0)
     timeHelper.sleep(2.1)
 
     cf.goTo(samples[0,:], yaw=0.0, duration=2)  # fly to first sample point (in high-lvl commander)
@@ -146,7 +145,7 @@ def followThePath(cf, wand, sampleAmount, RefHeight, swarm, timeHelper):
 
 
 def main():
-    RefHeight = 0.75
+    RefHeight = 0.0
     swarm = Crazyswarm()
     timeHelper = swarm.timeHelper
     cf = swarm.allcfs.crazyflies[0]
