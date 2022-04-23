@@ -1,65 +1,62 @@
 #!/usr/bin/env python3
-
 import numpy as np
 from pycrazyswarm import *
 import uav_trajectory
 
 
-def landInOrigin(cf, RefHeight, timeHelper):
+def landInOrigin(cf, RefHeigth,timeHelper):
     #
     # function that makes the cf fly back to the origin (0,0,RefHeigth+0.5) and land there
     #
 
-    cf.goTo([0, 0, RefHeight+0.5], yaw=0, duration=5)   
+    cf.goTo([0, 0, RefHeigth+0.5], yaw=0, duration=5)
     timeHelper.sleep(5)
-    cf.land(targetHeight=RefHeight+0.05, duration=2)
+    cf.land(targetHeight=RefHeigth+0.05, duration=2)
     timeHelper.sleep(2)
 
 
-def hoverTest(cf, RefHeight, timeHelper):
+def hoverTest(cf, RefHeigth, HoverHeigth, timeHelper):
     #
     # takeoff, hover for 5 seconds than land 
     #
     
-    cf.takeoff(targetHeight=1.5, duration=2)
+    cf.takeoff(targetHeight=HoverHeigth, duration=2)
     timeHelper.sleep(2 + 5)
-    cf.land(targetHeight=0.04, duration=2)
+    cf.land(targetHeight=RefHeigth+0.05, duration=2)
     timeHelper.sleep(2)
 
 
-def figure8(cf, RefHeight, timeHelper):
+def figure8(cf, RefHeigth, HoverHeigth, timeHelper):
     #
-    # fly a 8 figure forwards and backwards
+    # fly a predefined figure (in this script a 8 shaped figure) forwards and backwards
     #
 
     traj1 = uav_trajectory.Trajectory()
     traj1.loadcsv("figure8.csv")
 
     TRIALS = 1
-    TIMESCALE = 1.0
+    TIMESCALE = 1
     for i in range(TRIALS):
         cf.uploadTrajectory(0, 0, traj1)
-
-        cf.takeoff(targetHeight=RefHeight+1.5, duration=2.0)
-        timeHelper.sleep(2.5)
-        
+        cf.takeoff(targetHeight=HoverHeigth, duration=2)
+        timeHelper.sleep(2)
 
         cf.startTrajectory(0, timescale=TIMESCALE)
-        timeHelper.sleep(traj1.duration * TIMESCALE + 2.0)
+        timeHelper.sleep(traj1.duration * TIMESCALE+2)
         cf.startTrajectory(0, timescale=TIMESCALE, reverse=True)
-        timeHelper.sleep(traj1.duration * TIMESCALE + 2.0)
+        timeHelper.sleep(traj1.duration * TIMESCALE + 2)
 
-        cf.land(targetHeight=RefHeight+0.05, duration=3)
+        cf.land(targetHeight=RefHeigth+0.05, duration=3)
         timeHelper.sleep(3)
 
 
-def followTheWand(cf, wand, sampleAmount, RefHeight, swarm, timeHelper):
+def followTheWand(cf, wand, sampleAmount, RefHeigth, HoverHeigth, swarm, timeHelper):
     #
     # Follow the wand with a given distance
     #
 
     offset = np.array([0.4, 0.0, 0.0])  # offset in which the drone should follow the wand
-    cf.takeoff(targetHeight=RefHeight+1.5, duration=2)
+    cf.takeoff(targetHeight=HoverHeigth, duration=2)
     timeHelper.sleep(2)
 
     # Wait until key is pressed before following the wand
@@ -73,10 +70,10 @@ def followTheWand(cf, wand, sampleAmount, RefHeight, swarm, timeHelper):
         i = i+1
 
     cf.notifySetpointsStop(remainValidMillisecs=100)    # Needed for change of low-lvl commander to high-lvl commander (cmdPosition -> goTo)
-    landInOrigin(cf, RefHeight, timeHelper)
+    landInOrigin(cf, RefHeigth, timeHelper)
 
 
-def followTheWaypoints(cf, wand, RefHeight, swarm, timeHelper):
+def followTheWaypoints(cf, wand, RefHeigth, HoverHeigth, swarm, timeHelper):
     #
     # Set 4 waypoints and fly straight lines between those points
     #
@@ -110,17 +107,17 @@ def followTheWaypoints(cf, wand, RefHeight, swarm, timeHelper):
 
     print(waypoints)  
 
-    cf.takeoff(targetHeight=RefHeight+1.5, duration=2)
+    cf.takeoff(targetHeight=HoverHeigth, duration=2)
     timeHelper.sleep(3)
 
     for p in waypoints:
-        cf.goTo(p, yaw=0.0, duration=4)
+        cf.goTo(p, yaw=0, duration=4)
         timeHelper.sleep(4)
 
-    landInOrigin(cf, RefHeight, timeHelper)
+    landInOrigin(cf, RefHeigth, timeHelper)
 
 
-def followThePath(cf, wand, sampleAmount, RefHeight, swarm, timeHelper):
+def followThePath(cf, wand, sampleAmount, RefHeigth, HoverHeigth, swarm, timeHelper):
     #
     # Draw a path in the capture volume and fly through this path afterwards
     #
@@ -140,23 +137,24 @@ def followThePath(cf, wand, sampleAmount, RefHeight, swarm, timeHelper):
     print("\n\n--------------------Press a button to fly the path!--------------------")
     swarm.input.waitUntilButtonPressed()
 
-    cf.takeoff(targetHeight=RefHeight+1.5, duration=2.0)
-    timeHelper.sleep(2.1)
+    cf.takeoff(targetHeight=HoverHeigth, duration=2)
+    timeHelper.sleep(2)
 
-    cf.goTo(samples[0,:], yaw=0.0, duration=2)  # fly to first sample point (in high-lvl commander)
+    cf.goTo(samples[0,:], yaw=0, duration=2)  # fly to first sample point (in high-lvl commander)
     timeHelper.sleep(3)
 
     for n in samples:
-        cf.cmdPosition(n, yaw=0.0)
+        cf.cmdPosition(n, yaw=0)
         timeHelper.sleep(0.1)
 
     cf.notifySetpointsStop(remainValidMillisecs=100)    # Needed for change of low-lvl commander to high-lvl commander (cmdPosition -> goTo)
 
-    landInOrigin(cf, RefHeight, timeHelper)
+    landInOrigin(cf, RefHeigth, timeHelper)
 
 
 def main():
-    RefHeight = 0.0
+    RefHeigth = 0   # Height of starting point
+    HoverHeigth = RefHeigth + 1.5
     swarm = Crazyswarm()
     timeHelper = swarm.timeHelper
     cf = swarm.allcfs.crazyflies[0]
@@ -166,21 +164,21 @@ def main():
     progCode = int(input('Enter programcode to execute:\n\nHover test: --> 0\n\nFly a 8: --> 1\n\nFollow the wand --> 2\n\nFollow the Waypoints --> 3\n\nFollow the path --> 4\n\n\n'))
 
     if progCode == 0:
-        hoverTest(cf, RefHeight, timeHelper)
+        hoverTest(cf ,RefHeigth, HoverHeigth, timeHelper)
 
     elif progCode == 1:
-        figure8(cf, RefHeight, timeHelper)
+        figure8(cf, RefHeigth, HoverHeigth, timeHelper)
 
     elif progCode == 2:
         sampleAmount = (10*int(input('Enter time the cf should follow the wand[s]: ')))     # ~10 samples per second are taken
-        followTheWand(cf, wand, sampleAmount, RefHeight, swarm, timeHelper)
+        followTheWand(cf, wand, sampleAmount, RefHeigth, HoverHeigth, swarm, timeHelper)
 
     elif progCode == 3:
-        followTheWaypoints(cf, wand, RefHeight, swarm, timeHelper)
+        followTheWaypoints(cf, wand, RefHeigth, HoverHeigth, swarm, timeHelper)
 
     elif progCode == 4:
         sampleAmount = (10*int(input('Enter time the path should be stored[s]: ')))     # ~10 samples per second are taken
-        followThePath(cf, wand, sampleAmount, RefHeight, swarm, timeHelper)
+        followThePath(cf, wand, sampleAmount, RefHeigth, HoverHeigth, swarm, timeHelper)
         
     else:
         print("Programcode invalid!")
