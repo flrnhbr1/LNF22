@@ -170,7 +170,7 @@ def main():
     sampleAmount = 0
 
     # Progcode:
-    #   0  -->  hoverTest           ...  Fly straigth ip hover 5 seconds and land again.
+    #   0  -->  hoverTest           ...  Fly straigth up, hover 5 seconds and land again.
     #   1  -->  figure8             ...  Fly a trajectory two times, that looks like the number 8.
     #   2  -->  followTheWand       ...  The drone follows the wand for a given amount of time in a specific distance.
     #   3  -->  followTheWaypoints  ...  With the help of the wand, waypoints inside the capture volume can be set, after all are set the drone can fly along these waypoints.
