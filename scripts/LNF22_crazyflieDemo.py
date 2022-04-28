@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import numpy as np
+from colorama import init
+from termcolor import colored
 from pycrazyswarm import *
 import uav_trajectory
 
@@ -91,24 +93,24 @@ def followTheWaypoints(cf, wand, RefHeigth, FlightHeigth, swarm, timeHelper):
         (0.0, 0.0, 0.0),
     ])
 
-    print("Press key to set first waypoint\n\n\n")
+    print("\n\n\nPress key to set 1 waypoint\n\n\n")
     swarm.input.waitUntilButtonPressed()
     waypoints[0] = wand.position()
 
-    print("Press key to set second waypoint\n\n\n")
+    print("Press key to set 2 waypoint\n\n\n")
     swarm.input.waitUntilButtonPressed()
     waypoints[1] = wand.position()
 
-    print("Press key to set third waypoint\n\n\n")
+    print("Press key to set 3 waypoint\n\n\n")
     swarm.input.waitUntilButtonPressed()
     waypoints[2] = wand.position()
 
-    print("Press key to set fourth waypoint\n\n\n")
+    print("Press key to set 4 waypoint\n\n\n")
     swarm.input.waitUntilButtonPressed()
     waypoints[3] = wand.position()
 
 
-    print("Press key to start flying")
+    print("Press key to start flying\n\n\n")
     swarm.input.waitUntilButtonPressed()
 
     # Printing the initialized waypoints
@@ -131,7 +133,7 @@ def followThePath(cf, wand, sampleAmount, RefHeigth, FlightHeigth, swarm, timeHe
     #
 
     # Sample wand path    
-    print("\n\n\n\n----------------------- Press a key to start the trajectory sampling process! -----------------------\n\n\n")
+    print("\n\n\n\nPress a key to start the trajectory sampling process\n\n\n")
     
     samples = np.zeros((sampleAmount, 3))
     swarm.input.waitUntilButtonPressed()
@@ -142,7 +144,7 @@ def followThePath(cf, wand, sampleAmount, RefHeigth, FlightHeigth, swarm, timeHe
 
 
     # Fly the path
-    print("\n\n--------------------Press a key to fly the path!--------------------")
+    print("Press a key to fly the path\n\n\n")
     swarm.input.waitUntilButtonPressed()
 
     cf.takeoff(targetHeight=FlightHeigth, duration=2)
@@ -178,21 +180,27 @@ def main():
     #                                    After the path is drwan, the drone will fly along this path and land again.
 
     progCode = int(input('Enter programcode to execute:\n\nHover test: --> 0\n\nFly a 8: --> 1\n\nFollow the wand --> 2\n\nFollow the Waypoints --> 3\n\nFollow the path --> 4\n\n\n'))
-
+    print("\n\n")
+    init()  # for printing in color
     if progCode == 0:
+        print(colored('--- Hover Test --- ', 'white', 'on_blue'))
         hoverTest(cf ,RefHeigth, FlightHeigth, timeHelper)
 
     elif progCode == 1:
+        print(colored('--- Figure 8 --- ', 'white', 'on_blue'))
         figure8(cf, RefHeigth, FlightHeigth, timeHelper)
 
     elif progCode == 2:
+        print(colored('--- Follow the wand --- ', 'white', 'on_blue'))
         sampleAmount = (10*int(input('Enter time the cf should follow the wand[s]: ')))     # ~10 samples per second are taken
         followTheWand(cf, wand, sampleAmount, RefHeigth, FlightHeigth, swarm, timeHelper)
 
     elif progCode == 3:
+        print(colored('--- Follow the waypoints --- ', 'white', 'on_blue'))
         followTheWaypoints(cf, wand, RefHeigth, FlightHeigth, swarm, timeHelper)
 
     elif progCode == 4:
+        print(colored('--- Follow the path --- ', 'white', 'on_blue'))
         sampleAmount = (10*int(input('Enter time the path should be stored[s]: ')))     # ~10 samples per second are taken
         followThePath(cf, wand, sampleAmount, RefHeigth, FlightHeigth, swarm, timeHelper)
         
