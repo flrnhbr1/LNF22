@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
 import numpy as np
-from colorama import init
 from termcolor import colored
 from pycrazyswarm import *
 import uav_trajectory
 
 
-def landInOrigin(cf, RefHeigth,timeHelper):
+def landInOrigin(cf, RefHeigth, timeHelper):
     #
-    # function that makes the cf fly back to the origin (0,0,RefHeigth+0.5) and land there
+    # function that makes the cf fly back to the custom origin (1,-1,RefHeigth+0.5) and land there
     #
+    origin = [1, -1, RefHeigth+0.5]
 
-    cf.goTo([0, 0, RefHeigth+0.5], yaw=0, duration=5)
+    cf.goTo(origin, yaw=0, duration=5)
     timeHelper.sleep(5)
     cf.land(targetHeight=RefHeigth+0.05, duration=2)
     timeHelper.sleep(2)
@@ -44,6 +44,7 @@ def figure8(cf, RefHeigth, FlightHeigth, timeHelper):
         cf.uploadTrajectory(0, 0, traj1)
         cf.takeoff(targetHeight=FlightHeigth, duration=2)
         timeHelper.sleep(2)
+        timeHelper.sleep(5)
 
         # Fly the trajectory forwards
         cf.startTrajectory(0, timescale=TIMESCALE)
@@ -62,7 +63,7 @@ def followTheWand(cf, wand, sampleAmount, RefHeigth, FlightHeigth, swarm, timeHe
     # Follow the wand with a given distance
     #
 
-    offset = np.array([0.7, 0.0, 0.0])  # offset in which the drone should follow the wand
+    offset = np.array([0.0, 0.7, 0.0])  # offset in which the drone should follow the wand
     cf.takeoff(targetHeight=FlightHeigth, duration=2)
     timeHelper.sleep(2)
 
@@ -72,6 +73,8 @@ def followTheWand(cf, wand, sampleAmount, RefHeigth, FlightHeigth, swarm, timeHe
 
     # Following process
     i = 0
+    cf.goTo(wand.position() + offset, yaw=0, duration=2)
+    timeHelper.sleep(2)
     while i <= sampleAmount:
         cf.cmdPosition(wand.position() + offset, yaw=0.0)
         timeHelper.sleep(0.1)
@@ -171,6 +174,7 @@ def main():
     wand = swarm.allcfs.crazyflies[1]
     sampleAmount = 0
 
+
     # Progcode:
     #   0  -->  hoverTest           ...  Fly straigth up, hover 5 seconds and land again.
     #   1  -->  figure8             ...  Fly a trajectory two times, that looks like the number 8.
@@ -178,10 +182,10 @@ def main():
     #   3  -->  followTheWaypoints  ...  With the help of the wand, waypoints inside the capture volume can be set, after all are set the drone can fly along these waypoints.
     #   4  -->  followThePath       ...  With the help of the wand, a path can be drawn inside the capture volume, for a specific time.
     #                                    After the path is drwan, the drone will fly along this path and land again.
-
-    progCode = int(input('Enter programcode to execute:\n\nHover test: --> 0\n\nFly a 8: --> 1\n\nFollow the wand --> 2\n\nFollow the Waypoints --> 3\n\nFollow the path --> 4\n\n\n'))
     print("\n\n")
-    init()  # for printing in color
+    print(colored('Enter programcode to execute:', 'white', 'on_blue'))
+    progCode = int(input('\n\nHover test: --> 0\n\nFly a 8: --> 1\n\nFollow the wand --> 2\n\nFollow the Waypoints --> 3\n\nFollow the path --> 4\n\n\n'))
+    print("\n\n")
     if progCode == 0:
         print(colored('--- Hover Test --- ', 'white', 'on_blue'))
         hoverTest(cf ,RefHeigth, FlightHeigth, timeHelper)
