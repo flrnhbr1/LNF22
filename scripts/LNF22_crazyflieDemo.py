@@ -10,7 +10,7 @@ def landInOrigin(cf, RefHeigth, timeHelper):
     #
     # function that makes the cf fly back to the custom origin (1,-1,RefHeigth+0.5) and land there
     #
-    origin = [1, -1, RefHeigth+0.5]
+    origin = [1.5, -1.5, RefHeigth+0.5]
 
     cf.goTo(origin, yaw=0, duration=5)
     timeHelper.sleep(5)
